@@ -53,7 +53,7 @@
         .btn-login:hover { opacity: 0.95; }
         .login-error { color: var(--gov-red); font-size: 11px; margin-top: 8px; text-align: center; font-weight: 600; display: none; }
 
-        /* GIAO DIỆN CHÍNH (ẢN KHI CHƯA ĐĂNG NHẬP) */
+        /* GIAO DIỆN CHÍNH (ẨN KHI CHƯA ĐĂNG NHẬP) */
         .app-wrapper { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
 
         .admin-header {
@@ -174,7 +174,7 @@
         <div class="login-card">
             <div class="login-header">
                 <div class="login-emblem"><i class="fa-solid fa-star"></i></div>
-                <h2></h2>ẤP RẠCH LĂNG</h2>
+                <h2>ẤP RẠCH LĂNG</h2>
                 <p>Cổng Quản Lý Nhân Khẩu</p>
             </div>
             <form class="login-body" onsubmit="handleLogin(event)">
@@ -229,7 +229,7 @@
                 <div class="panel-body">
                     <div class="toolbar-top">
                         <div class="filter-grid">
-                            <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, SĐT, Địa chỉ..." oninput="applyFilters()">
+                            <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, Cha, Mẹ, SĐT, Địa chỉ..." oninput="applyFilters()">
                             <input type="text" id="searchCCCD" placeholder="Tìm CCCD..." oninput="applyFilters()">
                             <select id="searchGioiTinh" onchange="applyFilters()">
                                 <option value="">-- Giới tính --</option>
@@ -389,7 +389,7 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjcTtDmzHAIqF6KHtyNSgGVKYyAi-7qUKk-6xzaIcW91QbFWonYE3wZROxhuVpcLND8w/exec';
 
         // Cấu hình tài khoản đăng nhập mẫu
-const AUTH_CONFIG = {
+        const AUTH_CONFIG = {
             username: "aprachlang",
             password: "aprachlang123"
         };
@@ -493,12 +493,22 @@ const AUTH_CONFIG = {
                 const hoTen = String(r[1] || '').toLowerCase();
                 const cccd = String(r[4] || '').toLowerCase();
                 const gioiTinh = String(r[3] || '');
+                const cha = String(r[6] || '').toLowerCase();
+                const me = String(r[9] || '').toLowerCase();
                 const sdt = String(r[12] || '').toLowerCase();
                 const diaChi = String(r[13] || '').toLowerCase();
 
-                return (!kw || hoTen.includes(kw) || sdt.includes(kw) || diaChi.includes(kw)) &&
-                       (!cccdKw || cccd.includes(cccdKw)) &&
-                       (!genderKw || gioiTinh === genderKw);
+                const matchKeyword = !kw || 
+                    hoTen.includes(kw) || 
+                    cha.includes(kw) || 
+                    me.includes(kw) || 
+                    sdt.includes(kw) || 
+                    diaChi.includes(kw);
+
+                const matchCCCD = !cccdKw || cccd.includes(cccdKw);
+                const matchGender = !genderKw || gioiTinh === genderKw;
+
+                return matchKeyword && matchCCCD && matchGender;
             });
 
             renderTable(filteredDataCache);

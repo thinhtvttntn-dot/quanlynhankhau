@@ -53,7 +53,7 @@
         .btn-login:hover { opacity: 0.95; }
         .login-error { color: var(--gov-red); font-size: 11px; margin-top: 8px; text-align: center; font-weight: 600; display: none; }
 
-        /* GIAO DIỆN CHÍNH (ẨN KHI CHƯA ĐĂNG NHẬP) */
+        /* GIAO DIỆN CHÍNH */
         .app-wrapper { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
 
         .admin-header {
@@ -127,14 +127,51 @@
         .btn-edit { background-color: #DD6B20; }
         .btn-del { background-color: #E53E3E; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-card { background: white; width: 95%; max-width: 800px; max-height: 90vh; border-radius: 8px; border-top: 5px solid var(--gov-red); display: flex; flex-direction: column; overflow: hidden; }
+        /* TÙY CHỈNH MODAL & THANH CUỘN (SCROLLBAR) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 2000; justify-content: center; align-items: center; padding: 10px; }
+        
+        .modal-card { 
+            background: white; 
+            width: 100%; 
+            max-width: 800px; 
+            max-height: 90vh; 
+            border-radius: 8px; 
+            border-top: 5px solid var(--gov-red); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
 
-        .modal-header { background: #F7FAFC; padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header { background: #F7FAFC; padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .modal-title { font-size: 14px; font-weight: 800; color: var(--gov-dark-red); text-transform: uppercase; }
         .close-btn { font-size: 22px; cursor: pointer; color: #A0AEC0; border: none; background: none; }
 
-        .modal-body { padding: 14px; overflow-y: auto; flex: 1; }
+        /* Khung nội dung cho phép cuộn */
+        .modal-body { 
+            padding: 16px; 
+            overflow-y: auto; 
+            flex: 1; 
+            scrollbar-width: thin; /* Tùy chỉnh cho Firefox */
+            scrollbar-color: var(--gov-light-blue) #F0F4F8;
+        }
+
+        /* Tùy chỉnh thanh cuộn cho Webkit (Chrome, Edge, Safari) */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: #F0F4F8;
+            border-radius: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--gov-light-blue);
+            border-radius: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--gov-blue);
+        }
+
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 12px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group.full-width { grid-column: span 2; }
@@ -146,7 +183,7 @@
 
         .section-divider { grid-column: span 2; font-size: 11px; font-weight: 800; color: var(--gov-blue); border-bottom: 2px solid #E2E8F0; padding-bottom: 3px; margin-top: 6px; text-transform: uppercase; }
 
-        .modal-footer { background: #F7FAFC; padding: 10px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 8px; }
+        .modal-footer { background: #F7FAFC; padding: 10px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
 
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
@@ -289,7 +326,7 @@
                     <button class="close-btn" onclick="closeModal()">&times;</button>
                 </div>
                 
-                <form id="citizenForm" onsubmit="handleFormSubmit(event)">
+                <form id="citizenForm" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;" onsubmit="handleFormSubmit(event)">
                     <div class="modal-body">
                         <input type="hidden" id="editRowIndex" value="">
 
@@ -402,7 +439,6 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjcTtDmzHAIqF6KHtyNSgGVKYyAi-7qUKk-6xzaIcW91QbFWonYE3wZROxhuVpcLND8w/exec';
 
-        // Cấu hình tài khoản đăng nhập mẫu
         const AUTH_CONFIG = {
             username: "aprachlang",
             password: "aprachlang123"
@@ -415,7 +451,6 @@
             checkAuth();
         };
 
-        // Hàm xử lý hiển thị ô nhập khi chọn "Khác..."
         function toggleCustomInput(selectId, inputId) {
             const selectElem = document.getElementById(selectId);
             const inputElem = document.getElementById(inputId);
@@ -429,7 +464,6 @@
             }
         }
 
-        // --- XỬ LÝ ĐĂNG NHẬP ---
         function checkAuth() {
             const isLoggedIn = sessionStorage.getItem('isLoggedIn');
             if (isLoggedIn === 'true') {
@@ -464,7 +498,6 @@
             }
         }
 
-        // --- XỬ LÝ DỮ LIỆU ---
         function formatDate(val) {
             if (!val) return '';
             const strVal = String(val).trim();
@@ -593,13 +626,11 @@
             const editRowIndex = document.getElementById('editRowIndex').value;
             const action = editRowIndex ? "UPDATE" : "CREATE";
 
-            // Lấy giá trị Quan hệ
             let quanHeVal = document.getElementById('quanHe').value;
             if (quanHeVal === 'Khác') {
                 quanHeVal = document.getElementById('quanHeKhac').value.trim();
             }
 
-            // Lấy giá trị Địa chỉ
             let diaChiVal = document.getElementById('diaChi').value;
             if (diaChiVal === 'Khác') {
                 diaChiVal = document.getElementById('diaChiKhac').value.trim();
@@ -653,7 +684,6 @@
             document.getElementById('gioiTinh').value = r[3] || '';
             document.getElementById('cccd').value = r[4] || '';
 
-            // Xử lý nạp dữ liệu Quan hệ
             const quanHeVal = r[5] || '';
             const quanHeSelect = document.getElementById('quanHe');
             const quanHeKhacInput = document.getElementById('quanHeKhac');
@@ -677,7 +707,6 @@
             document.getElementById('cccdMe').value = r[11] || '';
             document.getElementById('sdt').value = r[12] || '';
 
-            // Xử lý nạp dữ liệu Địa chỉ
             const diaChiVal = r[13] || '';
             const diaChiSelect = document.getElementById('diaChi');
             const diaChiKhacInput = document.getElementById('diaChiKhac');

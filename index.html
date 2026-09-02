@@ -177,6 +177,34 @@
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* TOAST NOTIFICATION STYLES */
+        .toast {
+            background: #2D3748;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            pointer-events: auto;
+            animation: slideInRight 0.3s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+            border-left: 4px solid var(--gov-light-blue);
+        }
+        .toast.success { border-left-color: #38A169; }
+        .toast.error { border-left-color: #E53E3E; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(20px); }
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 768px) {
@@ -254,7 +282,7 @@
                 <div class="panel-body">
                     <div class="toolbar-top">
                         <div class="filter-grid">
-                            <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, Cha, Mẹ, SĐT, Địa chỉ..." oninput="applyFilters()">
+                            <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, Hộ, Cha, Mẹ, SĐT, Địa chỉ..." oninput="applyFilters()">
                             <input type="text" id="searchCCCD" placeholder="Tìm CCCD..." oninput="applyFilters()">
                             <select id="searchGioiTinh" onchange="applyFilters()">
                                 <option value="">-- Giới tính --</option>
@@ -280,6 +308,7 @@
                                     <th>Năm sinh</th>
                                     <th>Giới tính</th>
                                     <th>CCCD</th>
+                                    <th>Hộ</th>
                                     <th>Quan hệ</th>
                                     <th>Cha</th>
                                     <th>Năm sinh</th>
@@ -294,7 +323,7 @@
                             </thead>
                             <tbody id="dataTable">
                                 <tr>
-                                    <td colspan="16" style="text-align:center; padding: 20px; color: #A0AEC0;">
+                                    <td colspan="17" style="text-align:center; padding: 20px; color: #A0AEC0;">
                                         Đang tải dữ liệu...
                                     </td>
                                 </tr>
@@ -343,6 +372,11 @@
                             <div class="form-group">
                                 <label>CCCD</label>
                                 <input type="text" id="cccd" placeholder="Số CCCD" maxlength="12">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Hộ</label>
+                                <input type="text" id="ho" placeholder="Tên chủ hộ / Mã hộ">
                             </div>
 
                             <div class="form-group">
@@ -424,10 +458,11 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjcTtDmzHAIqF6KHtyNSgGVKYyAi-7qUKk-6xzaIcW91QbFWonYE3wZROxhuVpcLND8w/exec';
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
-        // ĐIỀN GOOGLE SPREADSHEET ID CỦA BẠN VÀO ĐÂY ĐỂ TẢI TRỰC TIẾP FILE XLSX
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmyCZ3pbsD9GDjPwL5ie694riTQ6W6vo_sRiZw8X08c323s2SKVK-k7a2Gr9YvoKNitA/exec';
         const SHEET_ID = '1-1TN-pkEo7_3gr7zXKHX8BvqIpqRMM8-cBTiUZtf7m4';
 
         const AUTH_CONFIG = {
@@ -441,6 +476,21 @@
         window.onload = function() {
             checkAuth();
         };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
 
         function toggleCustomInput(selectId, inputId) {
             const selectElem = document.getElementById(selectId);
@@ -530,7 +580,7 @@
                     applyFilters();
                 })
                 .catch(err => {
-                    document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
+                    document.getElementById('dataTable').innerHTML = `<tr><td colspan="17" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
                 })
                 .finally(() => showLoading(false));
         }
@@ -544,14 +594,16 @@
                 const r = item.cells;
                 const hoTen = String(r[1] || '').toLowerCase();
                 const cccd = String(r[4] || '').toLowerCase();
+                const ho = String(r[5] || '').toLowerCase();
                 const gioiTinh = String(r[3] || '');
-                const cha = String(r[6] || '').toLowerCase();
-                const me = String(r[9] || '').toLowerCase();
-                const sdt = String(r[12] || '').toLowerCase();
-                const diaChi = String(r[13] || '').toLowerCase();
+                const cha = String(r[7] || '').toLowerCase();
+                const me = String(r[10] || '').toLowerCase();
+                const sdt = String(r[13] || '').toLowerCase();
+                const diaChi = String(r[14] || '').toLowerCase();
 
                 const matchKeyword = !kw || 
                     hoTen.includes(kw) || 
+                    ho.includes(kw) || 
                     cha.includes(kw) || 
                     me.includes(kw) || 
                     sdt.includes(kw) || 
@@ -576,7 +628,7 @@
         function renderTable(list) {
             document.getElementById('totalRecords').innerText = list.length;
             if (list.length === 0) {
-                document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; padding: 20px; color: #A0AEC0;">Không có hồ sơ.</td></tr>`;
+                document.getElementById('dataTable').innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 20px; color: #A0AEC0;">Không có hồ sơ.</td></tr>`;
                 return;
             }
 
@@ -596,16 +648,17 @@
                     <td>${formatDate(r[2])}</td>
                     <td>${r[3] ? `<span class="badge-gender ${genderClass}">${r[3]}</span>` : ''}</td>
                     <td style="font-family: monospace;">${r[4] || ''}</td>
-                    <td>${r[5] || ''}</td>
+                    <td><b>${r[5] || ''}</b></td>
                     <td>${r[6] || ''}</td>
-                    <td>${formatDate(r[7])}</td>
-                    <td style="font-family: monospace;">${r[8] || ''}</td>
-                    <td>${r[9] || ''}</td>
-                    <td>${formatDate(r[10])}</td>
-                    <td style="font-family: monospace;">${r[11] || ''}</td>
-                    <td>${r[12] || ''}</td>
+                    <td>${r[7] || ''}</td>
+                    <td>${formatDate(r[8])}</td>
+                    <td style="font-family: monospace;">${r[9] || ''}</td>
+                    <td>${r[10] || ''}</td>
+                    <td>${formatDate(r[11])}</td>
+                    <td style="font-family: monospace;">${r[12] || ''}</td>
                     <td>${r[13] || ''}</td>
-                    <td style="font-style: italic; color: #718096;">${r[14] || ''}</td>
+                    <td>${r[14] || ''}</td>
+                    <td style="font-style: italic; color: #718096;">${r[15] || ''}</td>
                 </tr>`;
             });
             document.getElementById('dataTable').innerHTML = html;
@@ -635,6 +688,7 @@
                     namSinh: document.getElementById('namSinh').value,
                     gioiTinh: document.getElementById('gioiTinh').value,
                     cccd: document.getElementById('cccd').value,
+                    ho: document.getElementById('ho').value,
                     quanHe: quanHeVal,
                     cha: document.getElementById('cha').value,
                     namSinhCha: document.getElementById('namSinhCha').value,
@@ -658,11 +712,11 @@
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                alert(action === "CREATE" ? 'Đã thêm nhân khẩu thành công!' : 'Đã cập nhật thông tin thành công!');
+                showToast(action === "CREATE" ? 'Đã thêm nhân khẩu thành công!' : 'Đã cập nhật thông tin thành công!', 'success');
                 resetForm();
                 loadData();
             })
-            .catch(err => alert('Lỗi: ' + err))
+            .catch(err => showToast('Lỗi: ' + err, 'error'))
             .finally(() => showLoading(false));
         }
 
@@ -674,8 +728,9 @@
             document.getElementById('namSinh').value = formatDate(r[2]);
             document.getElementById('gioiTinh').value = r[3] || '';
             document.getElementById('cccd').value = r[4] || '';
+            document.getElementById('ho').value = r[5] || '';
 
-            const quanHeVal = r[5] || '';
+            const quanHeVal = r[6] || '';
             const quanHeSelect = document.getElementById('quanHe');
             const quanHeKhacInput = document.getElementById('quanHeKhac');
             if (['Chủ hộ', 'Vợ', 'Con', 'Cháu'].includes(quanHeVal)) {
@@ -690,15 +745,15 @@
                 quanHeKhacInput.style.display = 'none';
             }
 
-            document.getElementById('cha').value = r[6] || '';
-            document.getElementById('namSinhCha').value = formatDate(r[7]);
-            document.getElementById('cccdCha').value = r[8] || '';
-            document.getElementById('me').value = r[9] || '';
-            document.getElementById('namSinhMe').value = formatDate(r[10]);
-            document.getElementById('cccdMe').value = r[11] || '';
-            document.getElementById('sdt').value = r[12] || '';
+            document.getElementById('cha').value = r[7] || '';
+            document.getElementById('namSinhCha').value = formatDate(r[8]);
+            document.getElementById('cccdCha').value = r[9] || '';
+            document.getElementById('me').value = r[10] || '';
+            document.getElementById('namSinhMe').value = formatDate(r[11]);
+            document.getElementById('cccdMe').value = r[12] || '';
+            document.getElementById('sdt').value = r[13] || '';
 
-            const diaChiVal = r[13] || '';
+            const diaChiVal = r[14] || '';
             const diaChiSelect = document.getElementById('diaChi');
             const diaChiKhacInput = document.getElementById('diaChiKhac');
             if (['Ấp Rạch Lăng', 'Ấp Công nghiệp (Cũ)'].includes(diaChiVal)) {
@@ -713,7 +768,7 @@
                 diaChiKhacInput.style.display = 'none';
             }
 
-            document.getElementById('ghiChu').value = r[14] || '';
+            document.getElementById('ghiChu').value = r[15] || '';
 
             document.getElementById('btnSaveText').innerText = "Lưu Cập Nhật";
             document.getElementById('citizenModal').style.display = 'flex';
@@ -728,8 +783,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: "DELETE", rowIndex: rowIndex })
                 })
-                .then(() => { alert('Đã xóa thành công!'); loadData(); })
-                .catch(err => alert('Lỗi xóa: ' + err))
+                .then(() => { 
+                    showToast('Đã xóa thành công!', 'success'); 
+                    loadData(); 
+                })
+                .catch(err => showToast('Lỗi xóa: ' + err, 'error'))
                 .finally(() => showLoading(false));
             }
         }
@@ -748,10 +806,9 @@
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
 
-        // TẢI FILE EXCEL TRỰC TIẾP TỪ GOOGLE SHEET
         function exportToExcel() {
             if (!SHEET_ID || SHEET_ID === '1-YOUR-GOOGLE-SHEET-ID-HERE') {
-                alert("Vui lòng cấu hình hằng số SHEET_ID trong mã JavaScript để xuất file trực tiếp từ Google Sheet!");
+                showToast("Vui lòng cấu hình hằng số SHEET_ID trong mã JavaScript!", "error");
                 return;
             }
             const downloadUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`;

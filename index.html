@@ -309,7 +309,7 @@
                             <div class="form-group">
                                 <label>Giới tính</label>
                                 <select id="gioiTinh">
-                                    <option value="">-- Chọn --</option>
+                                    <option value="">-- Chọn giới tính --</option>
                                     <option value="Nam">Nam</option>
                                     <option value="Nữ">Nữ</option>
                                 </select>
@@ -322,7 +322,15 @@
 
                             <div class="form-group">
                                 <label>Quan hệ</label>
-                                <input type="text" id="quanHe" placeholder="Chủ hộ, Con, Vợ...">
+                                <select id="quanHe" onchange="toggleCustomInput('quanHe', 'quanHeKhac')">
+                                    <option value="">-- Chọn quan hệ --</option>
+                                    <option value="Chủ hộ">Chủ hộ</option>
+                                    <option value="Vợ">Vợ</option>
+                                    <option value="Con">Con</option>
+                                    <option value="Cháu">Cháu</option>
+                                    <option value="Khác">Khác...</option>
+                                </select>
+                                <input type="text" id="quanHeKhac" placeholder="Nhập quan hệ khác" style="display:none; margin-top:5px;">
                             </div>
 
                             <div class="section-divider"><i class="fa-solid fa-user-tie"></i> 2. Thông tin Cha</div>
@@ -364,7 +372,13 @@
 
                             <div class="form-group">
                                 <label>Địa chỉ</label>
-                                <input type="text" id="diaChi" placeholder="Ấp Rạch Lăng...">
+                                <select id="diaChi" onchange="toggleCustomInput('diaChi', 'diaChiKhac')">
+                                    <option value="">-- Chọn địa chỉ --</option>
+                                    <option value="Ấp Rạch Lăng">Ấp Rạch Lăng</option>
+                                    <option value="Ấp Công nghiệp (Cũ)">Ấp Công nghiệp (Cũ)</option>
+                                    <option value="Khác">Khác...</option>
+                                </select>
+                                <input type="text" id="diaChiKhac" placeholder="Nhập địa chỉ cụ thể" style="display:none; margin-top:5px;">
                             </div>
 
                             <div class="form-group full-width">
@@ -400,6 +414,20 @@
         window.onload = function() {
             checkAuth();
         };
+
+        // Hàm xử lý hiển thị ô nhập khi chọn "Khác..."
+        function toggleCustomInput(selectId, inputId) {
+            const selectElem = document.getElementById(selectId);
+            const inputElem = document.getElementById(inputId);
+            if (selectElem.value === 'Khác') {
+                inputElem.style.display = 'block';
+                inputElem.required = true;
+            } else {
+                inputElem.style.display = 'none';
+                inputElem.required = false;
+                inputElem.value = '';
+            }
+        }
 
         // --- XỬ LÝ ĐĂNG NHẬP ---
         function checkAuth() {
@@ -565,6 +593,18 @@
             const editRowIndex = document.getElementById('editRowIndex').value;
             const action = editRowIndex ? "UPDATE" : "CREATE";
 
+            // Lấy giá trị Quan hệ
+            let quanHeVal = document.getElementById('quanHe').value;
+            if (quanHeVal === 'Khác') {
+                quanHeVal = document.getElementById('quanHeKhac').value.trim();
+            }
+
+            // Lấy giá trị Địa chỉ
+            let diaChiVal = document.getElementById('diaChi').value;
+            if (diaChiVal === 'Khác') {
+                diaChiVal = document.getElementById('diaChiKhac').value.trim();
+            }
+
             const payload = {
                 action: action,
                 rowIndex: editRowIndex,
@@ -573,7 +613,7 @@
                     namSinh: document.getElementById('namSinh').value,
                     gioiTinh: document.getElementById('gioiTinh').value,
                     cccd: document.getElementById('cccd').value,
-                    quanHe: document.getElementById('quanHe').value,
+                    quanHe: quanHeVal,
                     cha: document.getElementById('cha').value,
                     namSinhCha: document.getElementById('namSinhCha').value,
                     cccdCha: document.getElementById('cccdCha').value,
@@ -581,7 +621,7 @@
                     namSinhMe: document.getElementById('namSinhMe').value,
                     cccdMe: document.getElementById('cccdMe').value,
                     sdt: document.getElementById('sdt').value,
-                    diaChi: document.getElementById('diaChi').value,
+                    diaChi: diaChiVal,
                     ghiChu: document.getElementById('ghiChu').value
                 }
             };
@@ -612,7 +652,23 @@
             document.getElementById('namSinh').value = formatDate(r[2]);
             document.getElementById('gioiTinh').value = r[3] || '';
             document.getElementById('cccd').value = r[4] || '';
-            document.getElementById('quanHe').value = r[5] || '';
+
+            // Xử lý nạp dữ liệu Quan hệ
+            const quanHeVal = r[5] || '';
+            const quanHeSelect = document.getElementById('quanHe');
+            const quanHeKhacInput = document.getElementById('quanHeKhac');
+            if (['Chủ hộ', 'Vợ', 'Con', 'Cháu'].includes(quanHeVal)) {
+                quanHeSelect.value = quanHeVal;
+                quanHeKhacInput.style.display = 'none';
+            } else if (quanHeVal) {
+                quanHeSelect.value = 'Khác';
+                quanHeKhacInput.value = quanHeVal;
+                quanHeKhacInput.style.display = 'block';
+            } else {
+                quanHeSelect.value = '';
+                quanHeKhacInput.style.display = 'none';
+            }
+
             document.getElementById('cha').value = r[6] || '';
             document.getElementById('namSinhCha').value = formatDate(r[7]);
             document.getElementById('cccdCha').value = r[8] || '';
@@ -620,7 +676,23 @@
             document.getElementById('namSinhMe').value = formatDate(r[10]);
             document.getElementById('cccdMe').value = r[11] || '';
             document.getElementById('sdt').value = r[12] || '';
-            document.getElementById('diaChi').value = r[13] || '';
+
+            // Xử lý nạp dữ liệu Địa chỉ
+            const diaChiVal = r[13] || '';
+            const diaChiSelect = document.getElementById('diaChi');
+            const diaChiKhacInput = document.getElementById('diaChiKhac');
+            if (['Ấp Rạch Lăng', 'Ấp Công nghiệp (Cũ)'].includes(diaChiVal)) {
+                diaChiSelect.value = diaChiVal;
+                diaChiKhacInput.style.display = 'none';
+            } else if (diaChiVal) {
+                diaChiSelect.value = 'Khác';
+                diaChiKhacInput.value = diaChiVal;
+                diaChiKhacInput.style.display = 'block';
+            } else {
+                diaChiSelect.value = '';
+                diaChiKhacInput.style.display = 'none';
+            }
+
             document.getElementById('ghiChu').value = r[14] || '';
 
             document.getElementById('btnSaveText').innerText = "Lưu Cập Nhật";
@@ -645,6 +717,8 @@
         function resetForm() {
             document.getElementById('citizenForm').reset();
             document.getElementById('editRowIndex').value = '';
+            document.getElementById('quanHeKhac').style.display = 'none';
+            document.getElementById('diaChiKhac').style.display = 'none';
             document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-user-plus"></i> Khai Báo Mới`;
             document.getElementById('btnSaveText').innerText = "Lưu Dữ Liệu";
         }
@@ -660,7 +734,7 @@
             filteredDataCache.forEach(item => {
                 tableHTML += '<tr>';
                 const r = item.cells;
-                tableHTML += `<td>${r[0]||''}</td><td>${r[1]||''}</td><td>${formatDate(r[2])}</td><td>${r[3]||''}</td><td>${r[4]||''}</td><td>${r[5]||''}</td><td>${r[6]||''}</td><td>${formatDate(r[7])}</td><td>${r[8]||''}</td><td>${r[9]||''}</td><td>${formatDate(r[10])}</td><td>${r[11]||''}</td><td>${r[12]||''}</td><td>${r[13]||''}</td><td>${r[14]||''}</td>`;
+                tableHTML += `<td>${r[0]||''}</td><td>${r[1]||''}</td><td>${formatDate(r[2])}</td><td>${r[3]||''}</td><td>${r[4]||''}</td><td>${r[5]||''}</td><td>${r[6]||''}</td><td>${formatDate(r[7])}</td><td>${r[8]||''}</td><td>${formatDate(r[10])}</td><td>${r[11]||''}</td><td>${r[12]||''}</td><td>${r[13]||''}</td><td>${r[14]||''}</td>`;
                 tableHTML += '</tr>';
             });
             tableHTML += '</tbody></table>';

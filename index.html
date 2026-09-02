@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CỔNG THÔNG TIN QUẢN LÝ NHÂN KHẨU ẤP RẠCH LĂNG</title>
+    <title>QUẢN LÝ NHÂN KHẨU ẤP RẠCH LĂNG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -147,30 +147,18 @@
         .modal-title { font-size: 14px; font-weight: 800; color: var(--gov-dark-red); text-transform: uppercase; }
         .close-btn { font-size: 22px; cursor: pointer; color: #A0AEC0; border: none; background: none; }
 
-        /* Khung nội dung cho phép cuộn */
         .modal-body { 
             padding: 16px; 
             overflow-y: auto; 
             flex: 1; 
-            scrollbar-width: thin; /* Tùy chỉnh cho Firefox */
+            scrollbar-width: thin;
             scrollbar-color: var(--gov-light-blue) #F0F4F8;
         }
 
-        /* Tùy chỉnh thanh cuộn cho Webkit (Chrome, Edge, Safari) */
-        .modal-body::-webkit-scrollbar {
-            width: 8px;
-        }
-        .modal-body::-webkit-scrollbar-track {
-            background: #F0F4F8;
-            border-radius: 4px;
-        }
-        .modal-body::-webkit-scrollbar-thumb {
-            background: var(--gov-light-blue);
-            border-radius: 4px;
-        }
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: var(--gov-blue);
-        }
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-track { background: #F0F4F8; border-radius: 4px; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--gov-light-blue); border-radius: 4px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: var(--gov-blue); }
 
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 12px; }
         .form-group { display: flex; flex-direction: column; }
@@ -277,7 +265,7 @@
 
                         <div class="btn-group-right">
                             <button class="btn btn-secondary" onclick="clearFilters()"><i class="fa-solid fa-xmark"></i> Xóa Lọc</button>
-                            <button class="btn btn-excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+                            <button class="btn btn-excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Tải xuống</button>
                             <button class="btn btn-reload" onclick="loadData()"><i class="fa-solid fa-rotate"></i> Tải lại</button>
                         </div>
                     </div>
@@ -438,6 +426,9 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjcTtDmzHAIqF6KHtyNSgGVKYyAi-7qUKk-6xzaIcW91QbFWonYE3wZROxhuVpcLND8w/exec';
+
+        // ĐIỀN GOOGLE SPREADSHEET ID CỦA BẠN VÀO ĐÂY ĐỂ TẢI TRỰC TIẾP FILE XLSX
+        const SHEET_ID = '1-1TN-pkEo7_3gr7zXKHX8BvqIpqRMM8-cBTiUZtf7m4';
 
         const AUTH_CONFIG = {
             username: "aprachlang",
@@ -757,23 +748,14 @@
             document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
 
+        // TẢI FILE EXCEL TRỰC TIẾP TỪ GOOGLE SHEET
         function exportToExcel() {
-            if (filteredDataCache.length === 0) return alert("Không có dữ liệu!");
-            let tableHTML = `<table border="1"><thead><tr><th>STT</th><th>Họ tên</th><th>Năm sinh</th><th>Giới tính</th><th>CCCD</th><th>Quan hệ</th><th>Cha</th><th>Năm sinh</th><th>CCCD cha</th><th>Mẹ</th><th>Năm sinh</th><th>CCCD mẹ</th><th>SĐT</th><th>Địa chỉ</th><th>Ghi chú</th></tr></thead><tbody>`;
-            filteredDataCache.forEach(item => {
-                tableHTML += '<tr>';
-                const r = item.cells;
-                tableHTML += `<td>${r[0]||''}</td><td>${r[1]||''}</td><td>${formatDate(r[2])}</td><td>${r[3]||''}</td><td>${r[4]||''}</td><td>${r[5]||''}</td><td>${r[6]||''}</td><td>${formatDate(r[7])}</td><td>${r[8]||''}</td><td>${formatDate(r[10])}</td><td>${r[11]||''}</td><td>${r[12]||''}</td><td>${r[13]||''}</td><td>${r[14]||''}</td>`;
-                tableHTML += '</tr>';
-            });
-            tableHTML += '</tbody></table>';
-
-            const blob = new Blob(['\ufeff' + tableHTML], { type: 'application/vnd.ms-excel' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `NhanKhau_ApRachLang_${new Date().toISOString().slice(0,10)}.xls`;
-            a.click();
+            if (!SHEET_ID || SHEET_ID === '1-YOUR-GOOGLE-SHEET-ID-HERE') {
+                alert("Vui lòng cấu hình hằng số SHEET_ID trong mã JavaScript để xuất file trực tiếp từ Google Sheet!");
+                return;
+            }
+            const downloadUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`;
+            window.open(downloadUrl, '_blank');
         }
     </script>
 </body>

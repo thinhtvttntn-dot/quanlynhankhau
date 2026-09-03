@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ĐĂNG NHẬP - QUẢN LÝ NHÂN KHẨU ẤP RẠCH LĂNG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gov-red: #A60C0C;
+            --gov-dark-red: #730000;
+            --gov-gold: #FFD700;
+            --gov-blue: #1A365D;
+            --border-color: #CBD5E0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: linear-gradient(135deg, var(--gov-blue) 0%, #0D1B2A 100%); padding: 16px;
+        }
+
+        .login-card {
+            background: #FFFFFF; width: 100%; max-width: 400px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-top: 6px solid var(--gov-red);
+            overflow: hidden; animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .login-header {
+            background: #FAF5FF; padding: 24px 20px 16px 20px; text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .login-emblem {
+            width: 60px; height: 60px; background: var(--gov-gold); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+            border: 2px solid var(--gov-red); box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .login-emblem i { font-size: 30px; color: var(--gov-dark-red); }
+        .login-header h2 { font-size: 15px; font-weight: 800; color: var(--gov-dark-red); text-transform: uppercase; }
+        .login-header p { font-size: 11px; color: #718096; margin-top: 4px; font-weight: 600; text-transform: uppercase; }
+        .login-body { padding: 20px; }
+        .login-body .form-group { margin-bottom: 14px; }
+        .login-body label { font-size: 11px; font-weight: 700; color: #4A5568; margin-bottom: 5px; display: block; text-transform: uppercase; }
+        .input-icon-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon-wrapper i { position: absolute; left: 12px; color: #A0AEC0; font-size: 14px; }
+        .input-icon-wrapper input { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; }
+        .input-icon-wrapper input:focus { border-color: #2B6CB0; box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2); }
+        
+        .btn-login { 
+            width: 100%; padding: 10px; background: linear-gradient(180deg, #C53030 0%, var(--gov-red) 100%); 
+            color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; 
+            cursor: pointer; text-transform: uppercase; margin-top: 8px; 
+        }
+        .btn-login:hover { opacity: 0.95; }
+        .login-error { color: var(--gov-red); font-size: 11px; margin-top: 8px; text-align: center; font-weight: 600; display: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-emblem"><i class="fa-solid fa-star"></i></div>
+            <h2>ẤP RẠCH LĂNG</h2>
+            <p>Cổng Quản Lý Nhân Khẩu</p>
+        </div>
+        <form class="login-body" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Tài khoản</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="loginUser" placeholder="Nhập tên đăng nhập" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="loginPass" placeholder="Nhập mật khẩu" required>
+                </div>
+            </div>
+            <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập</button>
+            <div class="login-error" id="loginError">Tài khoản hoặc mật khẩu không đúng!</div>
+        </form>
+    </div>
+
+    <script>
+        // Cấu hình tài khoản theo yêu cầu
+        const ACCOUNTS = [
+            { username: "admin", password: "admin123", role: "ADMIN", redirect: "admin.html" },
+            { username: "aprachlang", password: "aprachlang123", role: "USER", redirect: "user.html" }
+        ];
+
+        // Tự động chuyển hướng nếu phiên làm việc còn hiệu lực
+        window.onload = function() {
+            const role = sessionStorage.getItem('userRole');
+            if (role === 'ADMIN') {
+                window.location.href = 'admin.html';
+            } else if (role === 'USER') {
+                window.location.href = 'user.html';
+            }
+        };
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const errDiv = document.getElementById('loginError');
+
+            const matchedUser = ACCOUNTS.find(acc => acc.username === u && acc.password === p);
+
+            if (matchedUser) {
+                errDiv.style.display = 'none';
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('userRole', matchedUser.role);
+                window.location.href = matchedUser.redirect;
+            } else {
+                errDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

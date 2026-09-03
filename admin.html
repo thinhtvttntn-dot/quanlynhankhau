@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QUẢN LÝ NHÂN KHẨU ẤP RẠCH LĂNG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gov-red: #A60C0C;
+            --gov-dark-red: #730000;
+            --gov-gold: #FFD700;
+            --gov-blue: #1A365D;
+            --gov-light-blue: #2B6CB0;
+            --bg-gray: #F0F4F8;
+            --border-color: #CBD5E0;
+            --text-main: #2D3748;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-gray); 
+            color: var(--text-main); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+
+        .app-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--gov-dark-red) 0%, var(--gov-red) 100%);
+            color: white; padding: 10px 16px; border-bottom: 3px solid var(--gov-gold);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 8px;
+        }
+        .header-brand { display: flex; align-items: center; gap: 12px; }
+        .emblem-box {
+            width: 38px; height: 38px; background: var(--gov-gold); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 2px solid #FFF;
+        }
+        .emblem-icon { font-size: 20px; color: var(--gov-dark-red); }
+        .header-title h1 { font-size: 15px; font-weight: 800; text-transform: uppercase; color: #FFFFFF; line-height: 1.2; }
+        .header-title h2 { font-size: 11px; font-weight: 600; color: var(--gov-gold); text-transform: uppercase; }
+
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
+        .main-container { padding: 10px; flex: 1; display: flex; flex-direction: column; height: calc(100vh - 60px); overflow: hidden; }
+        .panel-full { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+        .panel-header { background: #E2E8F0; padding: 10px 14px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 8px; }
+        .panel-title { font-size: 12px; font-weight: 700; color: var(--gov-blue); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+
+        .stat-badge {
+            background: #EBF8FF; color: var(--gov-light-blue); padding: 4px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; border: 1px solid #BEE3F8; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+        }
+
+        .panel-body { padding: 10px; display: flex; flex-direction: column; flex: 1; overflow: hidden; gap: 10px; }
+
+        .toolbar-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .filter-grid { display: flex; gap: 8px; flex: 1; width: 100%; flex-wrap: wrap; }
+        .filter-grid input, .filter-grid select { 
+            padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; 
+            font-size: 12px; outline: none; background: #FAFAFA; flex: 1; min-width: 120px;
+        }
+
+        .btn-group-right { display: flex; gap: 6px; width: 100%; justify-content: flex-end; }
+
+        .btn { 
+            padding: 8px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; 
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; 
+            transition: all 0.2s; white-space: nowrap; justify-content: center;
+        }
+        .btn-add { background: linear-gradient(180deg, #C53030 0%, var(--gov-red) 100%); color: white; border: 1px solid #9B2C2C; }
+        .btn-save { background: linear-gradient(180deg, #2B6CB0 0%, #1A365D 100%); color: white; border: 1px solid #1A365D; }
+        .btn-excel { background: linear-gradient(180deg, #2F855A 0%, #22543D 100%); color: white; border: 1px solid #22543D; }
+        .btn-reload { background: #4A5568; color: white; }
+        .btn-secondary { background: #EDF2F7; color: #4A5568; border: 1px solid var(--border-color); }
+
+        .table-container { border: 1px solid var(--border-color); border-radius: 6px; overflow: auto; flex: 1; background: #FFF; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+        th { 
+            background: var(--gov-blue); color: white; font-weight: 700; padding: 10px 8px; 
+            border-bottom: 2px solid var(--border-color); white-space: nowrap; position: sticky; top: 0; z-index: 10; 
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        td { padding: 8px 10px; border-bottom: 1px solid #E2E8F0; border-right: 1px solid #EDF2F7; white-space: nowrap; }
+        td:last-child { border-right: none; }
+        tr:nth-child(even) { background-color: #F7FAFC; }
+
+        .badge-gender { padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+        .badge-nam { background-color: #EBF8FF; color: #2B6CB0; border: 1px solid #BEE3F8; }
+        .badge-nu { background-color: #FFF5F5; color: #C53030; border: 1px solid #FEB2B2; }
+
+        .btn-act { padding: 6px 10px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-edit { background-color: #DD6B20; }
+        .btn-del { background-color: #E53E3E; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 2000; justify-content: center; align-items: center; padding: 10px; }
+
+        .modal-card { 
+            background: white; 
+            width: 100%; 
+            max-width: 800px; 
+            max-height: 90vh; 
+            border-radius: 8px; 
+            border-top: 5px solid var(--gov-red); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header { background: #F7FAFC; padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .modal-title { font-size: 14px; font-weight: 800; color: var(--gov-dark-red); text-transform: uppercase; }
+        .close-btn { font-size: 22px; cursor: pointer; color: #A0AEC0; border: none; background: none; }
+
+        .modal-body { 
+            padding: 16px; 
+            overflow-y: auto; 
+            flex: 1; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--gov-light-blue) #F0F4F8;
+        }
+
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-track { background: #F0F4F8; border-radius: 4px; }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--gov-light-blue); border-radius: 4px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: var(--gov-blue); }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: span 2; }
+
+        label { font-size: 11px; font-weight: 700; color: #4A5568; margin-bottom: 3px; text-transform: uppercase; }
+        label .required { color: var(--gov-red); }
+
+        input, select, textarea { padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 12px; outline: none; background-color: #FAFAFA; }
+
+        .section-divider { grid-column: span 2; font-size: 11px; font-weight: 800; color: var(--gov-blue); border-bottom: 2px solid #E2E8F0; padding-bottom: 3px; margin-top: 6px; text-transform: uppercase; }
+
+        .modal-footer { background: #F7FAFC; padding: 10px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .admin-header { padding: 8px 12px; }
+            .header-title h1 { font-size: 13px; }
+            .header-title h2 { font-size: 10px; }
+            .main-container { padding: 6px; height: calc(100vh - 50px); }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width, .section-divider { grid-column: span 1; }
+            .modal-card { width: 100%; height: 100%; max-height: 100vh; border-radius: 0; }
+            .btn-group-right { width: 100%; }
+            .btn-group-right .btn { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper" id="appScreen">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <div id="loadingText" style="margin-top: 10px; font-size: 12px; font-weight: 600;">Đang kết nối...</div>
+        </div>
+
+        <header class="admin-header">
+            <div class="header-brand">
+                <div class="emblem-box"><i class="fa-solid fa-star emblem-icon"></i></div>
+                <div class="header-title">
+                    <h1>ẤP RẠCH LĂNG</h1>
+                    <h2>Quản Lý Nhân Khẩu Điện Tử</h2>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-add" onclick="openModal()"><i class="fa-solid fa-user-plus"></i> Khai Báo Mới</button>
+                <button class="btn btn-secondary" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div class="panel-full">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fa-solid fa-address-book"></i> Tra Cứu Nhân Khẩu</span>
+                    <div class="stat-badge"><i class="fa-solid fa-users"></i> Tổng: <strong id="totalRecords" style="color: var(--gov-red);">0</strong></div>
+                </div>
+                
+                <div class="panel-body">
+                    <div class="toolbar-top">
+                        <div class="filter-grid">
+                            <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, Hộ, Cha, Mẹ, SĐT, Địa chỉ..." oninput="applyFilters()">
+                            <input type="text" id="searchCCCD" placeholder="Tìm CCCD..." oninput="applyFilters()">
+                            <select id="searchGioiTinh" onchange="applyFilters()">
+                                <option value="">-- Giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group-right">
+                            <button class="btn btn-secondary" onclick="clearFilters()"><i class="fa-solid fa-xmark"></i> Xóa Lọc</button>
+                            <button class="btn btn-excel" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Tải về</button>
+                            <button class="btn btn-reload" onclick="loadData()"><i class="fa-solid fa-rotate"></i> Tải lại</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Thao tác</th>
+                                    <th>STT</th>
+                                    <th>Họ tên</th>
+                                    <th>Năm sinh</th>
+                                    <th>Giới tính</th>
+                                    <th>CCCD</th>
+                                    <th>Hộ</th>
+                                    <th>Quan hệ</th>
+                                    <th>Cha</th>
+                                    <th>Năm sinh</th>
+                                    <th>CCCD cha</th>
+                                    <th>Mẹ</th>
+                                    <th>Năm sinh</th>
+                                    <th>CCCD mẹ</th>
+                                    <th>SĐT</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable">
+                                <tr>
+                                    <td colspan="17" style="text-align:center; padding: 20px; color: #A0AEC0;">
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="citizenModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-title" id="modalTitle"><i class="fa-solid fa-user-plus"></i> Khai Báo Mới</span>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <form id="citizenForm" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;" onsubmit="handleFormSubmit(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="editRowIndex" value="">
+
+                        <div class="form-grid">
+                            <div class="section-divider"><i class="fa-solid fa-id-card"></i> 1. Cá nhân</div>
+
+                            <div class="form-group full-width">
+                                <label>Họ tên <span class="required">*</span></label>
+                                <input type="text" id="hoTen" placeholder="Nhập họ tên đầy đủ" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Năm sinh</label>
+                                <input type="text" id="namSinh" placeholder="02/01/2003 hoặc 2003">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <select id="gioiTinh">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>CCCD</label>
+                                <input type="text" id="cccd" placeholder="Số CCCD" maxlength="12">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Hộ</label>
+                                <input type="text" id="ho" placeholder="Tên chủ hộ / Mã hộ">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Quan hệ</label>
+                                <select id="quanHe" onchange="toggleCustomInput('quanHe', 'quanHeKhac')">
+                                    <option value="">-- Chọn quan hệ --</option>
+                                    <option value="Chủ hộ">Chủ hộ</option>
+                                    <option value="Vợ">Vợ</option>
+                                    <option value="Con">Con</option>
+                                    <option value="Cháu">Cháu</option>
+                                    <option value="Khác">Khác...</option>
+                                </select>
+                                <input type="text" id="quanHeKhac" placeholder="Nhập quan hệ khác" style="display:none; margin-top:5px;">
+                            </div>
+
+                            <div class="section-divider"><i class="fa-solid fa-user-tie"></i> 2. Thông tin Cha</div>
+
+                            <div class="form-group full-width">
+                                <label>Cha</label>
+                                <input type="text" id="cha" placeholder="Họ tên Cha">
+                            </div>
+                            <div class="form-group">
+                                <label>Năm sinh (Cha)</label>
+                                <input type="text" id="namSinhCha" placeholder="1971">
+                            </div>
+                            <div class="form-group">
+                                <label>CCCD cha</label>
+                                <input type="text" id="cccdCha" placeholder="CCCD Cha">
+                            </div>
+
+                            <div class="section-divider"><i class="fa-solid fa-person-dress"></i> 3. Thông tin Mẹ</div>
+
+                            <div class="form-group full-width">
+                                <label>Mẹ</label>
+                                <input type="text" id="me" placeholder="Họ tên Mẹ">
+                            </div>
+                            <div class="form-group">
+                                <label>Năm sinh (Mẹ)</label>
+                                <input type="text" id="namSinhMe" placeholder="1980">
+                            </div>
+                            <div class="form-group">
+                                <label>CCCD mẹ</label>
+                                <input type="text" id="cccdMe" placeholder="CCCD Mẹ">
+                            </div>
+
+                            <div class="section-divider"><i class="fa-solid fa-location-dot"></i> 4. Cư trú & Liên hệ</div>
+
+                            <div class="form-group">
+                                <label>SĐT</label>
+                                <input type="tel" id="sdt" placeholder="09xxxxxxx">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <select id="diaChi" onchange="toggleCustomInput('diaChi', 'diaChiKhac')">
+                                    <option value="">-- Chọn địa chỉ --</option>
+                                    <option value="Ấp Rạch Lăng">Ấp Rạch Lăng</option>
+                                    <option value="Ấp Công nghiệp (Cũ)">Ấp Công nghiệp (Cũ)</option>
+                                    <option value="Khác">Khác...</option>
+                                </select>
+                                <input type="text" id="diaChiKhac" placeholder="Nhập địa chỉ cụ thể" style="display:none; margin-top:5px;">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Ghi chú</label>
+                                <textarea id="ghiChu" rows="2" placeholder="Ghi chú..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy Bỏ</button>
+                        <button type="submit" class="btn btn-save" id="btnSave">
+                            <i class="fa-solid fa-floppy-disk"></i> <span id="btnSaveText">Lưu Dữ Liệu</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra xác thực ngay khi trang bắt đầu load
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmyCZ3pbsD9GDjPwL5ie694riTQ6W6vo_sRiZw8X08c323s2SKVK-k7a2Gr9YvoKNitA/exec';
+        const SHEET_ID = '1-1TN-pkEo7_3gr7zXKHX8BvqIpqRMM8-cBTiUZtf7m4';
+
+        let rawDataCache = [];
+        let filteredDataCache = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function toggleCustomInput(selectId, inputId) {
+            const selectElem = document.getElementById(selectId);
+            const inputElem = document.getElementById(inputId);
+            if (selectElem.value === 'Khác') {
+                inputElem.style.display = 'block';
+                inputElem.required = true;
+            } else {
+                inputElem.style.display = 'none';
+                inputElem.required = false;
+                inputElem.value = '';
+            }
+        }
+
+        function formatDate(val) {
+            if (!val) return '';
+            const strVal = String(val).trim();
+            if (strVal.includes('T') && strVal.includes('Z')) {
+                const date = new Date(strVal);
+                if (!isNaN(date.getTime())) {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                }
+            }
+            return strVal;
+        }
+
+        function openModal() {
+            resetForm();
+            document.getElementById('citizenModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('citizenModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('citizenModal');
+            if (event.target === modal) closeModal();
+        };
+
+        function loadData() {
+            showLoading(true, "Đang tải dữ liệu...");
+            fetch(SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => {
+                    rawDataCache = data.map((row, index) => ({ 
+                        sheetRowIndex: index + 3, 
+                        cells: row 
+                    }));
+                    applyFilters();
+                })
+                .catch(err => {
+                    document.getElementById('dataTable').innerHTML = `<tr><td colspan="17" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
+                })
+                .finally(() => showLoading(false));
+        }
+
+        function applyFilters() {
+            const kw = document.getElementById('searchKeyword').value.toLowerCase().trim();
+            const cccdKw = document.getElementById('searchCCCD').value.toLowerCase().trim();
+            const genderKw = document.getElementById('searchGioiTinh').value;
+
+            filteredDataCache = rawDataCache.filter(item => {
+                const r = item.cells;
+                const hoTen = String(r[1] || '').toLowerCase();
+                const cccd = String(r[4] || '').toLowerCase();
+                const ho = String(r[5] || '').toLowerCase();
+                const gioiTinh = String(r[3] || '');
+                const cha = String(r[7] || '').toLowerCase();
+                const me = String(r[10] || '').toLowerCase();
+                const sdt = String(r[13] || '').toLowerCase();
+                const diaChi = String(r[14] || '').toLowerCase();
+
+                const matchKeyword = !kw || 
+                    hoTen.includes(kw) || 
+                    ho.includes(kw) || 
+                    cha.includes(kw) || 
+                    me.includes(kw) || 
+                    sdt.includes(kw) || 
+                    diaChi.includes(kw);
+
+                const matchCCCD = !cccdKw || cccd.includes(cccdKw);
+                const matchGender = !genderKw || gioiTinh === genderKw;
+
+                return matchKeyword && matchCCCD && matchGender;
+            });
+
+            renderTable(filteredDataCache);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('searchCCCD').value = '';
+            document.getElementById('searchGioiTinh').value = '';
+            applyFilters();
+        }
+
+        function renderTable(list) {
+            document.getElementById('totalRecords').innerText = list.length;
+            if (list.length === 0) {
+                document.getElementById('dataTable').innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 20px; color: #A0AEC0;">Không có hồ sơ.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach(item => {
+                const r = item.cells;
+                const idx = item.sheetRowIndex;
+                const genderClass = r[3] === 'Nam' ? 'badge-nam' : (r[3] === 'Nữ' ? 'badge-nu' : '');
+
+                html += `<tr>
+                    <td style="text-align:center;">
+                        <button class="btn-act btn-edit" title="Sửa" onclick="editRow(${idx}, ${JSON.stringify(r).replace(/"/g, '&quot;')})"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-act btn-del" title="Xóa" onclick="deleteRow(${idx})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                    <td><b>${r[0] || ''}</b></td>
+                    <td style="font-weight: 700; color: var(--gov-dark-red);">${r[1] || ''}</td>
+                    <td>${formatDate(r[2])}</td>
+                    <td>${r[3] ? `<span class="badge-gender ${genderClass}">${r[3]}</span>` : ''}</td>
+                    <td style="font-family: monospace;">${r[4] || ''}</td>
+                    <td><b>${r[5] || ''}</b></td>
+                    <td>${r[6] || ''}</td>
+                    <td>${r[7] || ''}</td>
+                    <td>${formatDate(r[8])}</td>
+                    <td style="font-family: monospace;">${r[9] || ''}</td>
+                    <td>${r[10] || ''}</td>
+                    <td>${formatDate(r[11])}</td>
+                    <td style="font-family: monospace;">${r[12] || ''}</td>
+                    <td>${r[13] || ''}</td>
+                    <td>${r[14] || ''}</td>
+                    <td style="font-style: italic; color: #718096;">${r[15] || ''}</td>
+                </tr>`;
+            });
+            document.getElementById('dataTable').innerHTML = html;
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const editRowIndex = document.getElementById('editRowIndex').value;
+            const action = editRowIndex ? "UPDATE" : "CREATE";
+
+            let quanHeVal = document.getElementById('quanHe').value;
+            if (quanHeVal === 'Khác') {
+                quanHeVal = document.getElementById('quanHeKhac').value.trim();
+            }
+
+            let diaChiVal = document.getElementById('diaChi').value;
+            if (diaChiVal === 'Khác') {
+                diaChiVal = document.getElementById('diaChiKhac').value.trim();
+            }
+
+            const payload = {
+                action: action,
+                rowIndex: editRowIndex,
+                data: {
+                    hoTen: document.getElementById('hoTen').value,
+                    namSinh: document.getElementById('namSinh').value,
+                    gioiTinh: document.getElementById('gioiTinh').value,
+                    cccd: document.getElementById('cccd').value,
+                    ho: document.getElementById('ho').value,
+                    quanHe: quanHeVal,
+                    cha: document.getElementById('cha').value,
+                    namSinhCha: document.getElementById('namSinhCha').value,
+                    cccdCha: document.getElementById('cccdCha').value,
+                    me: document.getElementById('me').value,
+                    namSinhMe: document.getElementById('namSinhMe').value,
+                    cccdMe: document.getElementById('cccdMe').value,
+                    sdt: document.getElementById('sdt').value,
+                    diaChi: diaChiVal,
+                    ghiChu: document.getElementById('ghiChu').value
+                }
+            };
+
+            closeModal();
+            showLoading(true, "Đang xử lý...");
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert(action === "CREATE" ? 'Đã thêm nhân khẩu thành công!' : 'Đã cập nhật thông tin thành công!');
+                resetForm();
+                loadData();
+            })
+            .catch(err => alert('Lỗi: ' + err))
+            .finally(() => showLoading(false));
+        }
+
+        function editRow(rowIndex, r) {
+            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-user-pen"></i> Chỉnh Sửa Hồ Sơ`;
+            document.getElementById('editRowIndex').value = rowIndex;
+
+            document.getElementById('hoTen').value = r[1] || '';
+            document.getElementById('namSinh').value = formatDate(r[2]);
+            document.getElementById('gioiTinh').value = r[3] || '';
+            document.getElementById('cccd').value = r[4] || '';
+            document.getElementById('ho').value = r[5] || '';
+
+            const quanHeVal = r[6] || '';
+            const quanHeSelect = document.getElementById('quanHe');
+            const quanHeKhacInput = document.getElementById('quanHeKhac');
+            if (['Chủ hộ', 'Vợ', 'Con', 'Cháu'].includes(quanHeVal)) {
+                quanHeSelect.value = quanHeVal;
+                quanHeKhacInput.style.display = 'none';
+            } else if (quanHeVal) {
+                quanHeSelect.value = 'Khác';
+                quanHeKhacInput.value = quanHeVal;
+                quanHeKhacInput.style.display = 'block';
+            } else {
+                quanHeSelect.value = '';
+                quanHeKhacInput.style.display = 'none';
+            }
+
+            document.getElementById('cha').value = r[7] || '';
+            document.getElementById('namSinhCha').value = formatDate(r[8]);
+            document.getElementById('cccdCha').value = r[9] || '';
+            document.getElementById('me').value = r[10] || '';
+            document.getElementById('namSinhMe').value = formatDate(r[11]);
+            document.getElementById('cccdMe').value = r[12] || '';
+            document.getElementById('sdt').value = r[13] || '';
+
+            const diaChiVal = r[14] || '';
+            const diaChiSelect = document.getElementById('diaChi');
+            const diaChiKhacInput = document.getElementById('diaChiKhac');
+            if (['Ấp Rạch Lăng', 'Ấp Công nghiệp (Cũ)'].includes(diaChiVal)) {
+                diaChiSelect.value = diaChiVal;
+                diaChiKhacInput.style.display = 'none';
+            } else if (diaChiVal) {
+                diaChiSelect.value = 'Khác';
+                diaChiKhacInput.value = diaChiVal;
+                diaChiKhacInput.style.display = 'block';
+            } else {
+                diaChiSelect.value = '';
+                diaChiKhacInput.style.display = 'none';
+            }
+
+            document.getElementById('ghiChu').value = r[15] || '';
+
+            document.getElementById('btnSaveText').innerText = "Lưu Cập Nhật";
+            document.getElementById('citizenModal').style.display = 'flex';
+        }
+
+        function deleteRow(rowIndex) {
+            if (confirm(`Bạn chắc chắn muốn xóa dòng ${rowIndex}?`)) {
+                showLoading(true, "Đang xóa...");
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "DELETE", rowIndex: rowIndex })
+                })
+                .then(() => { alert('Đã xóa thành công!'); loadData(); })
+                .catch(err => alert('Lỗi xóa: ' + err))
+                .finally(() => showLoading(false));
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('citizenForm').reset();
+            document.getElementById('editRowIndex').value = '';
+            document.getElementById('quanHeKhac').style.display = 'none';
+            document.getElementById('diaChiKhac').style.display = 'none';
+            document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-user-plus"></i> Khai Báo Mới`;
+            document.getElementById('btnSaveText').innerText = "Lưu Dữ Liệu";
+        }
+
+        function showLoading(show, text) {
+            document.getElementById('loadingText').innerText = text || '';
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+
+        function exportToExcel() {
+            if (!SHEET_ID) {
+                alert("Vui lòng cấu hình hằng số SHEET_ID!");
+                return;
+            }
+            
+            const downloadUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx&range=A2:Z`;
+            
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

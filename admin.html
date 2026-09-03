@@ -154,6 +154,61 @@
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Style cho Toast Notification góc dưới bên phải */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            min-width: 280px;
+            max-width: 360px;
+            background: #ffffff;
+            color: #2D3748;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 5px solid #4A5568;
+            animation: slideInRight 0.3s ease, fadeOut 0.5s ease 3.5s forwards;
+        }
+
+        .toast-icon { font-size: 20px; }
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+        .toast-message { font-size: 12px; color: #718096; }
+
+        .toast-success { border-left-color: #38A169; }
+        .toast-success .toast-icon { color: #38A169; }
+
+        .toast-error { border-left-color: #E53E3E; }
+        .toast-error .toast-icon { color: #E53E3E; }
+
+        .toast-info { border-left-color: #3182CE; }
+        .toast-info .toast-icon { color: #3182CE; }
+
+        .toast-warning { border-left-color: #DD6B20; }
+        .toast-warning .toast-icon { color: #DD6B20; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
         @media (max-width: 768px) {
             .admin-header { padding: 8px 12px; }
             .header-title h1 { font-size: 13px; }
@@ -164,6 +219,8 @@
             .modal-card { width: 100%; height: 100%; max-height: 100vh; border-radius: 0; }
             .btn-group-right { width: 100%; }
             .btn-group-right .btn { flex: 1; }
+            .toast-container { bottom: 10px; right: 10px; left: 10px; }
+            .toast { min-width: auto; width: 100%; }
         }
     </style>
 </head>
@@ -373,8 +430,10 @@
         </div>
     </div>
 
+    <!-- Container nhận các thông báo góc dưới bên phải -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
-        // Kiểm tra xác thực ngay khi trang bắt đầu load
         if (!sessionStorage.getItem('isLoggedIn')) {
             window.location.href = 'login.html';
         }
@@ -389,9 +448,38 @@
             loadData();
         });
 
+        // Hàm Toast Notification góc dưới bên phải
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            let iconClass = 'fa-circle-info';
+            if (type === 'success') iconClass = 'fa-circle-check';
+            if (type === 'error') iconClass = 'fa-circle-xmark';
+            if (type === 'warning') iconClass = 'fa-triangle-exclamation';
+
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
         function logout() {
+            showToast('info', 'Đăng xuất', 'Đang đăng xuất khỏi hệ thống...');
             sessionStorage.clear();
-            window.location.href = 'index.html';
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         }
 
         function toggleCustomInput(selectId, inputId) {
@@ -449,6 +537,7 @@
                 })
                 .catch(err => {
                     document.getElementById('dataTable').innerHTML = `<tr><td colspan="17" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
+                    showToast('error', 'Lỗi CSDL', 'Không thể tải dữ liệu từ máy chủ.');
                 })
                 .finally(() => showLoading(false));
         }
@@ -491,6 +580,7 @@
             document.getElementById('searchCCCD').value = '';
             document.getElementById('searchGioiTinh').value = '';
             applyFilters();
+            showToast('info', 'Thông báo', 'Đã xóa bộ lọc tìm kiếm.');
         }
 
         function renderTable(list) {
@@ -580,11 +670,15 @@
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                alert(action === "CREATE" ? 'Đã thêm nhân khẩu thành công!' : 'Đã cập nhật thông tin thành công!');
+                if (action === "CREATE") {
+                    showToast('success', 'Thêm mới thành công', 'Đã lưu nhân khẩu mới vào hệ thống.');
+                } else {
+                    showToast('success', 'Cập nhật thành công', 'Hồ sơ nhân khẩu đã được chỉnh sửa.');
+                }
                 resetForm();
                 loadData();
             })
-            .catch(err => alert('Lỗi: ' + err))
+            .catch(err => showToast('error', 'Lỗi thao tác', 'Không thể hoàn tất: ' + err))
             .finally(() => showLoading(false));
         }
 
@@ -651,8 +745,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: "DELETE", rowIndex: rowIndex })
                 })
-                .then(() => { alert('Đã xóa thành công!'); loadData(); })
-                .catch(err => alert('Lỗi xóa: ' + err))
+                .then(() => { 
+                    showToast('warning', 'Đã xóa dữ liệu', `Đã xóa thành công hồ sơ dòng số ${rowIndex}.`); 
+                    loadData(); 
+                })
+                .catch(err => showToast('error', 'Lỗi xóa', 'Thao tác xóa thất bại: ' + err))
                 .finally(() => showLoading(false));
             }
         }
@@ -673,7 +770,7 @@
 
         function exportToExcel() {
             if (!SHEET_ID) {
-                alert("Vui lòng cấu hình hằng số SHEET_ID!");
+                showToast('error', 'Lỗi cấu hình', 'Vui lòng cấu hình hằng số SHEET_ID!');
                 return;
             }
             
@@ -685,6 +782,7 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            showToast('info', 'Tải file', 'Đang tải xuống file dữ liệu...');
         }
     </script>
 </body>

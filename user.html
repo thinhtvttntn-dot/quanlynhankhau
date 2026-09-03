@@ -87,6 +87,66 @@
         .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Giao diện Toast Notification đặt tại góc dưới bên phải */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            min-width: 280px;
+            max-width: 360px;
+            background: #ffffff;
+            color: #2D3748;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 5px solid #4A5568;
+            animation: slideInRight 0.3s ease, fadeOut 0.5s ease 3.5s forwards;
+        }
+
+        .toast-icon { font-size: 20px; }
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+        .toast-message { font-size: 12px; color: #718096; }
+
+        .toast-success { border-left-color: #38A169; }
+        .toast-success .toast-icon { color: #38A169; }
+
+        .toast-error { border-left-color: #E53E3E; }
+        .toast-error .toast-icon { color: #E53E3E; }
+
+        .toast-info { border-left-color: #3182CE; }
+        .toast-info .toast-icon { color: #3182CE; }
+
+        .toast-warning { border-left-color: #DD6B20; }
+        .toast-warning .toast-icon { color: #DD6B20; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .toast-container { bottom: 10px; right: 10px; left: 10px; }
+            .toast { min-width: auto; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -166,6 +226,9 @@
         </div>
     </div>
 
+    <!-- Khung chứa thông báo Toast góc dưới bên phải -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmyCZ3pbsD9GDjPwL5ie694riTQ6W6vo_sRiZw8X08c323s2SKVK-k7a2Gr9YvoKNitA/exec';
         let rawDataCache = [];
@@ -178,11 +241,38 @@
             }
         };
 
+        // Hàm phát hiệu ứng Toast góc dưới bên phải
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            let iconClass = 'fa-circle-info';
+            if (type === 'success') iconClass = 'fa-circle-check';
+            if (type === 'error') iconClass = 'fa-circle-xmark';
+            if (type === 'warning') iconClass = 'fa-triangle-exclamation';
+
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
         function handleLogout() {
-            if (confirm("Bạn muốn đăng xuất khỏi cổng tra cứu?")) {
-                sessionStorage.clear();
-                window.location.href = 'login.html';
-            }
+            showToast('info', 'Đăng xuất', 'Đang rời khỏi cổng tra cứu...');
+            sessionStorage.clear();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         }
 
         function formatDate(val) {
@@ -201,8 +291,14 @@
             showLoading(true, "Đang tải dữ liệu...");
             fetch(SCRIPT_URL)
                 .then(res => res.json())
-                .then(data => { rawDataCache = data; applyFilters(); })
-                .catch(() => alert('Lỗi tải CSDL!'))
+                .then(data => { 
+                    rawDataCache = data; 
+                    applyFilters(); 
+                })
+                .catch(err => {
+                    document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
+                    showToast('error', 'Lỗi CSDL', 'Không thể kết nối đến dữ liệu hệ thống!');
+                })
                 .finally(() => showLoading(false));
         }
 
@@ -226,12 +322,13 @@
             document.getElementById('searchCCCD').value = '';
             document.getElementById('searchGioiTinh').value = '';
             applyFilters();
+            showToast('info', 'Thông báo', 'Đã xóa thiết lập tìm kiếm.');
         }
 
         function renderTable(list) {
             document.getElementById('totalRecords').innerText = list.length;
             if (list.length === 0) {
-                document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; padding:20px;">Không có dữ liệu.</td></tr>`;
+                document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; padding:20px; color: #A0AEC0;">Không có dữ liệu phù hợp.</td></tr>`;
                 return;
             }
             let html = '';
@@ -242,18 +339,18 @@
                     <td style="font-weight:700; color:var(--gov-dark-red);">${r[1] || ''}</td>
                     <td>${formatDate(r[2])}</td>
                     <td>${r[3] ? `<span class="badge-gender ${genderClass}">${r[3]}</span>` : ''}</td>
-                    <td>${r[4] || ''}</td>
+                    <td style="font-family: monospace;">${r[4] || ''}</td>
                     <td><b>${r[5] || ''}</b></td>
                     <td>${r[6] || ''}</td>
                     <td>${r[7] || ''}</td>
                     <td>${formatDate(r[8])}</td>
-                    <td>${r[9] || ''}</td>
+                    <td style="font-family: monospace;">${r[9] || ''}</td>
                     <td>${r[10] || ''}</td>
                     <td>${formatDate(r[11])}</td>
-                    <td>${r[12] || ''}</td>
+                    <td style="font-family: monospace;">${r[12] || ''}</td>
                     <td>${r[13] || ''}</td>
                     <td>${r[14] || ''}</td>
-                    <td>${r[15] || ''}</td>
+                    <td style="font-style: italic; color: #718096;">${r[15] || ''}</td>
                 </tr>`;
             });
             document.getElementById('dataTable').innerHTML = html;

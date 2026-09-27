@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRA CỨU - NHÂN KHẨU ẤP RẠCH LĂNG</title>
+    <title>TRA Cá»¨U - NHÃ‚N KHáº¨U áº¤P Ráº CH LÄ‚NG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -94,7 +94,7 @@
         .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Giao diện Toast Notification đặt tại góc dưới bên phải */
+        /* Giao diá»‡n Toast Notification Ä‘áº·t táº¡i gÃ³c dÆ°á»›i bÃªn pháº£i */
         .toast-container {
             position: fixed;
             bottom: 20px;
@@ -160,47 +160,47 @@
     <div class="app-wrapper">
         <div class="loading-overlay" id="loadingOverlay">
             <div class="spinner"></div>
-            <div id="loadingText" style="margin-top: 10px; font-size: 12px; font-weight: 600;">Đang kết nối...</div>
+            <div id="loadingText" style="margin-top: 10px; font-size: 12px; font-weight: 600;">Äang káº¿t ná»‘i...</div>
         </div>
 
         <header class="admin-header">
             <div class="header-brand">
                 <div class="emblem-box"><i class="fa-solid fa-star emblem-icon"></i></div>
                 <div class="header-title">
-                    <h1>ẤP RẠCH LĂNG</h1>
-                    <h2>Cổng Tra Cứu Nhân Khẩu</h2>
+                    <h1>áº¤P Ráº CH LÄ‚NG</h1>
+                    <h2>Cá»•ng Tra Cá»©u NhÃ¢n Kháº©u</h2>
                 </div>
             </div>
-            <button class="btn btn-logout" onclick="handleLogout()" title="Đăng xuất"><i class="fa-solid fa-power-off"></i> Đăng xuất</button>
+            <button class="btn btn-logout" onclick="handleLogout()" title="ÄÄƒng xuáº¥t"><i class="fa-solid fa-power-off"></i> ÄÄƒng xuáº¥t</button>
         </header>
 
         <div class="main-container">
             <div class="panel-full">
                 <div class="panel-header">
-                    <span class="panel-title"><i class="fa-solid fa-address-book"></i> Cổng Tra Cứu Dữ Liệu</span>
-                    <div class="stat-badge"><i class="fa-solid fa-users"></i> Tổng: <strong id="totalRecords" style="color: var(--gov-red);">0</strong></div>
+                    <span class="panel-title"><i class="fa-solid fa-address-book"></i> Cá»•ng Tra Cá»©u Dá»¯ Liá»‡u</span>
+                    <div class="stat-badge"><i class="fa-solid fa-users"></i> Tá»•ng: <strong id="totalRecords" style="color: var(--gov-red);">0</strong></div>
                 </div>
                 
                 <div class="panel-body">
-                    <div class="area-tabs" role="group" aria-label="Chọn khu vực">
-                        <button type="button" class="area-tab active" data-area="all" aria-pressed="true" onclick="selectArea('all')">Tổng nhân khẩu</button>
-                        <button type="button" class="area-tab" data-area="cong-nghiep" aria-pressed="false" onclick="selectArea('cong-nghiep')"> Khu vực Công Nghiệp (cũ)</button>
-                        <button type="button" class="area-tab" data-area="rach-lang" aria-pressed="false" onclick="selectArea('rach-lang')">Khu vực Rạch Lăng</button>
+                    <div class="area-tabs" role="group" aria-label="Chá»n khu vá»±c">
+                        <button type="button" class="area-tab active" data-area="all" aria-pressed="true" onclick="selectArea('all')">Tá»•ng nhÃ¢n kháº©u</button>
+                        <button type="button" class="area-tab" data-area="cong-nghiep" aria-pressed="false" onclick="selectArea('cong-nghiep')"> Khu vá»±c CÃ´ng Nghiá»‡p (cÅ©)</button>
+                        <button type="button" class="area-tab" data-area="rach-lang" aria-pressed="false" onclick="selectArea('rach-lang')">Khu vá»±c Ráº¡ch LÄƒng</button>
                     </div>
                     <div class="toolbar-top">
                         <div class="filter-grid">
-                            <input type="text" id="searchKeyword" placeholder="Tìm kiếm" oninput="applyFilters()">
-                            <input type="text" id="searchCCCD" placeholder="Tìm CCCD..." oninput="applyFilters()">
+                            <input type="text" id="searchKeyword" placeholder="TÃ¬m kiáº¿m" oninput="applyFilters()">
+                            <input type="text" id="searchCCCD" placeholder="TÃ¬m CCCD..." oninput="applyFilters()">
                             <select id="searchGioiTinh" onchange="applyFilters()">
-                                <option value="">-- Giới tính --</option>
+                                <option value="">-- Giá»›i tÃ­nh --</option>
                                 <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
+                                <option value="Ná»¯">Ná»¯</option>
                             </select>
                         </div>
 
                         <div class="btn-group-right">
-                            <button class="btn btn-secondary" onclick="clearFilters()"><i class="fa-solid fa-xmark"></i> Xóa Lọc</button>
-                            <button class="btn btn-reload" onclick="loadData()"><i class="fa-solid fa-rotate"></i> Tải lại</button>
+                            <button class="btn btn-secondary" onclick="clearFilters()"><i class="fa-solid fa-xmark"></i> XÃ³a Lá»c</button>
+                            <button class="btn btn-reload" onclick="loadData()"><i class="fa-solid fa-rotate"></i> Táº£i láº¡i</button>
                         </div>
                     </div>
 
@@ -209,25 +209,25 @@
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Họ tên</th>
-                                    <th>Năm sinh</th>
-                                    <th>Giới tính</th>
+                                    <th>Há» tÃªn</th>
+                                    <th>NÄƒm sinh</th>
+                                    <th>Giá»›i tÃ­nh</th>
                                     <th>CCCD</th>
-                                    <th>Hộ</th>
-                                    <th>Quan hệ</th>
+                                    <th>Há»™</th>
+                                    <th>Quan há»‡</th>
                                     <th>Cha</th>
-                                    <th>Năm sinh</th>
+                                    <th>NÄƒm sinh</th>
                                     <th>CCCD cha</th>
-                                    <th>Mẹ</th>
-                                    <th>Năm sinh</th>
-                                    <th>CCCD mẹ</th>
-                                    <th>SĐT</th>
-                                    <th>Địa chỉ</th>
-                                    <th>Ghi chú</th>
+                                    <th>Máº¹</th>
+                                    <th>NÄƒm sinh</th>
+                                    <th>CCCD máº¹</th>
+                                    <th>SÄT</th>
+                                    <th>Äá»‹a chá»‰</th>
+                                    <th>Ghi chÃº</th>
                                 </tr>
                             </thead>
                             <tbody id="dataTable">
-                                <tr><td colspan="16" style="text-align:center; padding: 20px; color: #A0AEC0;">Đang tải dữ liệu...</td></tr>
+                                <tr><td colspan="16" style="text-align:center; padding: 20px; color: #A0AEC0;">Äang táº£i dá»¯ liá»‡u...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -237,7 +237,7 @@
         </div>
     </div>
 
-    <!-- Khung chứa thông báo Toast góc dưới bên phải -->
+    <!-- Khung chá»©a thÃ´ng bÃ¡o Toast gÃ³c dÆ°á»›i bÃªn pháº£i -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
@@ -265,7 +265,7 @@
             }
         };
 
-        // Hàm phát hiệu ứng Toast góc dưới bên phải
+        // HÃ m phÃ¡t hiá»‡u á»©ng Toast gÃ³c dÆ°á»›i bÃªn pháº£i
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -292,7 +292,7 @@
         }
 
         function handleLogout() {
-            showToast('info', 'Đăng xuất', 'Đang rời khỏi cổng tra cứu...');
+            showToast('info', 'ÄÄƒng xuáº¥t', 'Äang rá»i khá»i cá»•ng tra cá»©u...');
             sessionStorage.clear();
             setTimeout(() => {
                 window.location.href = 'index.html';
@@ -313,8 +313,8 @@
 
         function loadData() {
             const currentRequest = ++requestNumber;
-            showLoading(true, "Đang tải dữ liệu...");
-            document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; padding:20px;">Đang tải dữ liệu...</td></tr>';
+            showLoading(true, "Äang táº£i dá»¯ liá»‡u...");
+            document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; padding:20px;">Äang táº£i dá»¯ liá»‡u...</td></tr>';
             const url = new URL(SCRIPT_URL);
             url.searchParams.set('area', selectedArea);
             fetch(url.toString())
@@ -324,7 +324,7 @@
                 })
                 .then(data => {
                     if (currentRequest !== requestNumber) return;
-                    if (!Array.isArray(data)) throw new Error('Dữ liệu không đúng định dạng');
+                    if (!Array.isArray(data)) throw new Error('Dá»¯ liá»‡u khÃ´ng Ä‘Ãºng Ä‘á»‹nh dáº¡ng');
                     rawDataCache = data;
                     applyFilters();
                 })
@@ -332,8 +332,8 @@
                     if (currentRequest !== requestNumber) return;
                     rawDataCache = [];
                     document.getElementById('totalRecords').innerText = '0';
-                    document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; color:red; padding:20px;">Lỗi kết nối CSDL!</td></tr>';
-                    showToast('error', 'Lỗi CSDL', 'Không thể kết nối đến dữ liệu hệ thống!');
+                    document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; color:red; padding:20px;">Lá»—i káº¿t ná»‘i CSDL!</td></tr>';
+                    showToast('error', 'Lá»—i CSDL', 'KhÃ´ng thá»ƒ káº¿t ná»‘i Ä‘áº¿n dá»¯ liá»‡u há»‡ thá»‘ng!');
                 })
                 .finally(() => { if (currentRequest === requestNumber) showLoading(false); });
         }
@@ -344,10 +344,16 @@
             const genderKw = document.getElementById('searchGioiTinh').value;
 
             const filtered = rawDataCache.filter(r => {
+                // Chá»‰ Ã¡p dá»¥ng Ä‘iá»u kiá»‡n Ä‘á»‹a chá»‰ cho hai má»¥c khu vá»±c.
+                const address = String(r[14] || '').normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '').replace(/[Ä‘Ä]/g, 'd').toLowerCase();
+                const matchArea = selectedArea === 'all' ||
+                    (selectedArea === 'rach-lang' && address.includes('ap rach lang')) ||
+                    (selectedArea === 'cong-nghiep' && address.includes('ap cong nghiep'));
                 const matchKeyword = !kw || [r[1], r[5], r[7], r[10], r[13], r[14]].some(val => String(val || '').toLowerCase().includes(kw));
                 const matchCCCD = !cccdKw || String(r[4] || '').toLowerCase().includes(cccdKw);
                 const matchGender = !genderKw || String(r[3] || '') === genderKw;
-                return matchKeyword && matchCCCD && matchGender;
+                return matchArea && matchKeyword && matchCCCD && matchGender;
             });
 
             renderTable(filtered);
@@ -358,18 +364,18 @@
             document.getElementById('searchCCCD').value = '';
             document.getElementById('searchGioiTinh').value = '';
             applyFilters();
-            showToast('info', 'Thông báo', 'Đã xóa thiết lập tìm kiếm.');
+            showToast('info', 'ThÃ´ng bÃ¡o', 'ÄÃ£ xÃ³a thiáº¿t láº­p tÃ¬m kiáº¿m.');
         }
 
         function renderTable(list) {
             document.getElementById('totalRecords').innerText = list.length;
             if (list.length === 0) {
-                document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; padding:20px; color: #A0AEC0;">Không có dữ liệu phù hợp.</td></tr>`;
+                document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; padding:20px; color: #A0AEC0;">KhÃ´ng cÃ³ dá»¯ liá»‡u phÃ¹ há»£p.</td></tr>`;
                 return;
             }
             let html = '';
             list.forEach(r => {
-                const genderClass = r[3] === 'Nam' ? 'badge-nam' : (r[3] === 'Nữ' ? 'badge-nu' : '');
+                const genderClass = r[3] === 'Nam' ? 'badge-nam' : (r[3] === 'Ná»¯' ? 'badge-nu' : '');
                 html += `<tr>
                     <td><b>${r[0] || ''}</b></td>
                     <td style="font-weight:700; color:var(--gov-dark-red);">${r[1] || ''}</td>

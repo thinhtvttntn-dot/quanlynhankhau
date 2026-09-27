@@ -90,8 +90,12 @@
         .badge-nam { background-color: #EBF8FF; color: #2B6CB0; border: 1px solid #BEE3F8; }
         .badge-nu { background-color: #FFF5F5; color: #C53030; border: 1px solid #FEB2B2; }
 
-        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid var(--gov-gold); width: 36px; height: 36px; animation: spin 1s linear infinite; }
+        .loading-status { display: none; position: fixed; top: 70px; right: 14px; z-index: 9999;
+            align-items: center; gap: 8px; padding: 9px 12px; border-radius: 8px;
+            background: var(--gov-blue); color: white; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+            font-size: 12px; font-weight: 600; }
+        .spinner { border: 2px solid rgba(255,255,255,.35); border-top-color: var(--gov-gold);
+            border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; flex-shrink: 0; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Giao diện Toast Notification đặt tại góc dưới bên phải */
@@ -157,11 +161,12 @@
 </head>
 <body>
 
+    <div class="loading-status" id="loadingStatus" role="status" aria-live="polite">
+        <div class="spinner"></div><span id="loadingText">Đang tải dữ liệu...</span>
+    </div>
+
     <div class="app-wrapper">
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="spinner"></div>
-            <div id="loadingText" style="margin-top: 10px; font-size: 12px; font-weight: 600;">Đang kết nối...</div>
-        </div>
+
 
         <header class="admin-header">
             <div class="header-brand">
@@ -226,9 +231,7 @@
                                     <th>Ghi chú</th>
                                 </tr>
                             </thead>
-                            <tbody id="dataTable">
-                                <tr><td colspan="16" style="text-align:center; padding: 20px; color: #A0AEC0;">Đang tải dữ liệu...</td></tr>
-                            </tbody>
+                            <tbody id="dataTable"></tbody>
                         </table>
                     </div>
 
@@ -314,7 +317,7 @@
         function loadData() {
             const currentRequest = ++requestNumber;
             showLoading(true, "Đang tải dữ liệu...");
-            document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; padding:20px;">Đang tải dữ liệu...</td></tr>';
+            document.getElementById('dataTable').replaceChildren();
             const url = new URL(SCRIPT_URL);
             url.searchParams.set('area', selectedArea);
             fetch(url.toString())
@@ -398,9 +401,9 @@
             document.getElementById('dataTable').innerHTML = html;
         }
 
-        function showLoading(s, t) {
-            document.getElementById('loadingText').innerText = t || '';
-            document.getElementById('loadingOverlay').style.display = s ? 'flex' : 'none';
+        function showLoading(show, message) {
+            document.getElementById('loadingText').textContent = message || 'Đang tải dữ liệu...';
+            document.getElementById('loadingStatus').style.display = show ? 'flex' : 'none';
         }
     </script>
 </body>

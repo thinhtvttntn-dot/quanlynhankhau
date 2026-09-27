@@ -187,6 +187,7 @@
                         <button type="button" class="area-tab" data-area="cong-nghiep" aria-pressed="false" onclick="selectArea('cong-nghiep')">🏭 Công Nghiệp (cũ)</button>
                         <button type="button" class="area-tab" data-area="rach-lang" aria-pressed="false" onclick="selectArea('rach-lang')">📍 Rạch Lăng</button>
                     </div>
+                    <div class="area-note" id="areaNote" hidden></div>
                     <div class="toolbar-top">
                         <div class="filter-grid">
                             <input type="text" id="searchKeyword" placeholder="Tìm Họ tên, Hộ, Cha, Mẹ, SĐT, Địa chỉ..." oninput="applyFilters()">
@@ -245,7 +246,17 @@
         let rawDataCache = [];
         let selectedArea = 'all';
 
-        let requestNumber = 0;
+        function normalizeArea(value) {
+            return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+        }
+
+        function getArea(row) {
+            // Cột thứ 17 (nếu có) là Khu vực; nếu trống, dùng cột Địa chỉ (thứ 15).
+            const value = normalizeArea(row[16] || row[14]);
+            if (/cong\s*nghiep/.test(value)) return 'cong-nghiep';
+            if (/rach\s*lang/.test(value)) return 'rach-lang';
+            return '';
+        }
 
         function selectArea(area) {
             selectedArea = area;
@@ -254,7 +265,7 @@
                 button.classList.toggle('active', active);
                 button.setAttribute('aria-pressed', String(active));
             });
-            loadData();
+            applyFilters();
         }
 
         window.onload = function() {
@@ -312,30 +323,19 @@
         }
 
         function loadData() {
-            const currentRequest = ++requestNumber;
             showLoading(true, "Đang tải dữ liệu...");
-            document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; padding:20px;">Đang tải dữ liệu...</td></tr>';
-            const url = new URL(SCRIPT_URL);
-            url.searchParams.set('area', selectedArea);
-            fetch(url.toString())
-                .then(res => {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.json();
-                })
-                .then(data => {
-                    if (currentRequest !== requestNumber) return;
+            fetch(SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => { 
                     if (!Array.isArray(data)) throw new Error('Dữ liệu không đúng định dạng');
                     rawDataCache = data;
-                    applyFilters();
+                    applyFilters(); 
                 })
                 .catch(err => {
-                    if (currentRequest !== requestNumber) return;
-                    rawDataCache = [];
-                    document.getElementById('totalRecords').innerText = '0';
-                    document.getElementById('dataTable').innerHTML = '<tr><td colspan="16" style="text-align:center; color:red; padding:20px;">Lỗi kết nối CSDL!</td></tr>';
+                    document.getElementById('dataTable').innerHTML = `<tr><td colspan="16" style="text-align:center; color:red; padding: 20px;">Lỗi kết nối CSDL!</td></tr>`;
                     showToast('error', 'Lỗi CSDL', 'Không thể kết nối đến dữ liệu hệ thống!');
                 })
-                .finally(() => { if (currentRequest === requestNumber) showLoading(false); });
+                .finally(() => showLoading(false));
         }
 
         function applyFilters() {
@@ -343,11 +343,17 @@
             const cccdKw = document.getElementById('searchCCCD').value.toLowerCase().trim();
             const genderKw = document.getElementById('searchGioiTinh').value;
 
+            const unknownCount = rawDataCache.filter(r => !getArea(r)).length;
+            const areaNote = document.getElementById('areaNote');
+            areaNote.hidden = unknownCount === 0;
+            areaNote.textContent = unknownCount ? `${unknownCount} dòng chưa xác định khu vực; chỉ hiển thị trong Tổng nhân khẩu. Hãy thêm tên khu vực vào cột Địa chỉ hoặc cột Khu vực (cột thứ 17).` : '';
+
             const filtered = rawDataCache.filter(r => {
+                const matchArea = selectedArea === 'all' || getArea(r) === selectedArea;
                 const matchKeyword = !kw || [r[1], r[5], r[7], r[10], r[13], r[14]].some(val => String(val || '').toLowerCase().includes(kw));
                 const matchCCCD = !cccdKw || String(r[4] || '').toLowerCase().includes(cccdKw);
                 const matchGender = !genderKw || String(r[3] || '') === genderKw;
-                return matchKeyword && matchCCCD && matchGender;
+                return matchArea && matchKeyword && matchCCCD && matchGender;
             });
 
             renderTable(filtered);
